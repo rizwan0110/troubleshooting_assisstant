@@ -1,0 +1,52 @@
+[
+  {
+    "query": "What is a Docker container?",
+    "expected_chunk_keywords": ["container", "isolated", "process", "self-contained", "portable"],
+    "expected_answer_contains": ["isolated process", "self-contained"]
+  },
+  {
+    "query": "How is a container different from a virtual machine?",
+    "expected_chunk_keywords": ["container", "virtual machine", "kernel", "operating system", "lightweight"],
+    "expected_answer_contains": ["kernel", "operating system"]
+  },
+  {
+    "query": "What is a Docker image and what are its key principles?",
+    "expected_chunk_keywords": ["image", "immutable", "layers", "standardized package", "binaries"],
+    "expected_answer_contains": ["immutable", "layers"]
+  },
+  {
+    "query": "How do you publish a container port to the host machine?",
+    "expected_chunk_keywords": ["publish", "port", "-p", "HOST_PORT", "CONTAINER_PORT"],
+    "expected_answer_contains": ["-p", "HOST_PORT", "CONTAINER_PORT"]
+  },
+  {
+    "query": "What is Docker Hub and what is a registry?",
+    "expected_chunk_keywords": ["registry", "Docker Hub", "public", "storing", "sharing", "images"],
+    "expected_answer_contains": ["registry", "Docker Hub", "storing"]
+  },
+  {
+    "query": "How do you build and tag a Docker image?",
+    "expected_chunk_keywords": ["docker build", "tag", "-t", "Dockerfile", "image"],
+    "expected_answer_contains": ["docker build", "-t"]
+  },
+  {
+    "query": "What is the Docker build cache and how does it speed up builds?",
+    "expected_chunk_keywords": ["cache", "layer", "reuse", "invalidate", "faster"],
+    "expected_answer_contains": ["cache", "layer", "reuse"]
+  },
+  {
+    "query": "What is Docker Compose and why is it used for multi-container applications?",
+    "expected_chunk_keywords": ["Docker Compose", "multi-container", "YAML", "compose.yml", "services"],
+    "expected_answer_contains": ["Docker Compose", "YAML", "multi-container"]
+  },
+  {
+    "query": "How do you override container defaults like ports and environment variables?",
+    "expected_chunk_keywords": ["-p", "-e", "environment", "docker run", "override"],
+    "expected_answer_contains": ["-p", "-e", "docker run"]
+  },
+  {
+    "query": "What is the difference between a registry and a repository in Docker?",
+    "expected_chunk_keywords": ["registry", "repository", "centralized", "collection", "images"],
+    "expected_answer_contains": ["registry", "repository"]
+  }
+]
