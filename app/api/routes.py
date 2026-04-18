@@ -14,4 +14,3 @@ def ingest(request:IngestRequest):
         word_count=word_count,
         chunks_created=chunks_count
     )
-
