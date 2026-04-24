@@ -43,5 +43,6 @@ class VectorStore:
                 results.append((self.chunks[idx], dist))
 
         return results
-    
+
+
 vector_store = VectorStore()

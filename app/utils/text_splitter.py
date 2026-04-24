@@ -13,9 +13,10 @@ class Chunk:
     chunk_index: int
     embedding: Optional[List[float]] = None
 
+
 # Splits markdown by headings like #, ##, ###.
 def split_markdown_into_sections(text: str) -> list[dict]:
-    
+
     sections = []
 
     lines = text.split("\n")
@@ -51,6 +52,7 @@ def split_markdown_into_sections(text: str) -> list[dict]:
 
     return sections
 
+
 # If a section is too big, splits it into smaller word-based chunks.
 def split_large_section(section_text: str, chunk_size: int = 500) -> list[str]:
     words = section_text.split()
@@ -67,8 +69,11 @@ def split_large_section(section_text: str, chunk_size: int = 500) -> list[str]:
 
     return chunks
 
+
 # Converts one Document into final Chunk objects with metadata.
-def split_document_into_chunks(document: Document, chunk_size: int = 500) -> list[Chunk]:
+def split_document_into_chunks(
+    document: Document, chunk_size: int = 500
+) -> list[Chunk]:
     chunks = []
     sections = split_markdown_into_sections(document.content)
 

@@ -12,7 +12,11 @@ def chunk_is_relevant(chunk_text: str, keywords: list[str]) -> bool:
     return matches >= len(keywords) / 2
 
 
-def evaluate_retrieval(hybrid_retriever: HybridRetriever, reranker: Reranker, test_path: str = "eval/test_questions.json"):
+def evaluate_retrieval(
+    hybrid_retriever: HybridRetriever,
+    reranker: Reranker,
+    test_path: str = "eval/test_questions.json",
+):
     with open(test_path) as f:
         test_data = json.load(f)
 
@@ -32,7 +36,9 @@ def evaluate_retrieval(hybrid_retriever: HybridRetriever, reranker: Reranker, te
         relevant_count = sum(1 for r in reranked if chunk_is_relevant(r.text, keywords))
 
         # Count total relevant chunks in full candidate pool
-        total_relevant = sum(1 for c in candidates if chunk_is_relevant(c.text, keywords))
+        total_relevant = sum(
+            1 for c in candidates if chunk_is_relevant(c.text, keywords)
+        )
 
         # Precision@5: of 5 returned, how many are relevant?
         precision_total += relevant_count / len(reranked) if reranked else 0
@@ -48,7 +54,9 @@ def evaluate_retrieval(hybrid_retriever: HybridRetriever, reranker: Reranker, te
 
         # Per-query log
         print(f"\nQuery: {query}")
-        print(f"  Relevant in top 5: {relevant_count} | Total relevant: {total_relevant}")
+        print(
+            f"  Relevant in top 5: {relevant_count} | Total relevant: {total_relevant}"
+        )
 
     n = len(test_data)
     print(f"\n{'='*50}")
@@ -63,5 +71,5 @@ def evaluate_retrieval(hybrid_retriever: HybridRetriever, reranker: Reranker, te
     return {
         "precision_at_5": precision_total / n,
         "recall_at_5": recall_total / n,
-        "mrr": mrr_total / n
+        "mrr": mrr_total / n,
     }

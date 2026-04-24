@@ -8,7 +8,11 @@ from app.utils.text_splitter import Chunk
 logger = logging.getLogger(__name__)
 
 
-def evaluate_generation(hybrid_retriever: HybridRetriever, reranker: Reranker, test_path: str = "eval/test_questions.json"):
+def evaluate_generation(
+    hybrid_retriever: HybridRetriever,
+    reranker: Reranker,
+    test_path: str = "eval/test_questions.json",
+):
     with open(test_path) as f:
         test_data = json.load(f)
 
@@ -62,6 +66,4 @@ def evaluate_generation(hybrid_retriever: HybridRetriever, reranker: Reranker, t
     print(f"  Avg keyword coverage   : {avg_score:.2%}")
     print(f"{'='*50}\n")
 
-    return {
-        "avg_keyword_coverage": avg_score
-    }
+    return {"avg_keyword_coverage": avg_score}

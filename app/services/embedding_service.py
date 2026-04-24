@@ -4,10 +4,7 @@ from typing import List
 from app.core.retry import retry_on_api_failure
 from app.core.timeout import timeout_config
 
-
-
 model = SentenceTransformer("all-MiniLM-L6-v2")
-
 
 
 @retry_on_api_failure(max_attempts=3, min_wait=1, max_wait=10)
@@ -24,6 +21,7 @@ def generate_embeddings(chunks: List[Chunk]) -> List[Chunk]:
         chunk.embedding = embedding.tolist()
 
     return chunks
+
 
 @retry_on_api_failure(max_attempts=3, min_wait=1, max_wait=10)
 def generate_query_embedding(query: str) -> List[float]:

@@ -29,7 +29,6 @@ Question:
 {query}
 """
 
-    
     answer = generate_response(prompt, query=query)
     sources = [
         {
@@ -41,7 +40,4 @@ Question:
         for chunk in chunks
     ]
 
-    return {
-        "answer": answer,
-        "sources": sources
-    }
+    return {"answer": answer, "sources": sources}

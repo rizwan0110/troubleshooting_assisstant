@@ -14,14 +14,17 @@ class ScoredChunk:
     combined_score: float
     metadata: dict
 
+
 class HybridRetriever:
     def __init__(self, vector_store: VectorStore, alpha: float = 0.5):
         self.vector_store = vector_store
         self.alpha = alpha
         self.bm25 = None
-        
+
     def build_bm25_index(self):
-        tokenized_corpus = [chunk.text.lower().split() for chunk in self.vector_store.chunks]
+        tokenized_corpus = [
+            chunk.text.lower().split() for chunk in self.vector_store.chunks
+        ]
         self.bm25 = BM25Okapi(tokenized_corpus)
 
     def _normalize_scores(self, scores: List[float]) -> List[float]:
@@ -80,22 +83,25 @@ class HybridRetriever:
         # Step 5: Compute combined score and build ScoredChunks
         results = []
         for entry in score_map.values():
-            combined = self.alpha * entry["dense_score"] + (1 - self.alpha) * entry["sparse_score"]
-            results.append(ScoredChunk(
-                text=entry["chunk"].text,
-                dense_score=entry["dense_score"],
-                sparse_score=entry["sparse_score"],
-                combined_score=combined,
-
-                
-                metadata={
-                    "chunk_id": entry["chunk"].chunk_id,
-                    "doc_id": entry["chunk"].doc_id,
-                    "source": entry["chunk"].source,
-                    "section_title": entry["chunk"].section_title,
-                    "chunk_index": entry["chunk"].chunk_index,
-                }
-            ))
+            combined = (
+                self.alpha * entry["dense_score"]
+                + (1 - self.alpha) * entry["sparse_score"]
+            )
+            results.append(
+                ScoredChunk(
+                    text=entry["chunk"].text,
+                    dense_score=entry["dense_score"],
+                    sparse_score=entry["sparse_score"],
+                    combined_score=combined,
+                    metadata={
+                        "chunk_id": entry["chunk"].chunk_id,
+                        "doc_id": entry["chunk"].doc_id,
+                        "source": entry["chunk"].source,
+                        "section_title": entry["chunk"].section_title,
+                        "chunk_index": entry["chunk"].chunk_index,
+                    },
+                )
+            )
 
         # Step 6: Sort by combined score (highest first) and return top_k
         results.sort(key=lambda x: x.combined_score, reverse=True)

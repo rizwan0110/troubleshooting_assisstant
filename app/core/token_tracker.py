@@ -22,7 +22,14 @@ class TokenTracker:
     total_tokens: int = 0
     total_requests: int = 0
 
-    def track(self, query: str, prompt_tokens: int, completion_tokens: int, total_tokens: int, model: str):
+    def track(
+        self,
+        query: str,
+        prompt_tokens: int,
+        completion_tokens: int,
+        total_tokens: int,
+        model: str,
+    ):
         usage = TokenUsage(
             query=query[:100],
             prompt_tokens=prompt_tokens,
@@ -42,7 +49,9 @@ class TokenTracker:
         )
 
     def get_summary(self) -> dict:
-        avg_tokens = self.total_tokens / self.total_requests if self.total_requests > 0 else 0
+        avg_tokens = (
+            self.total_tokens / self.total_requests if self.total_requests > 0 else 0
+        )
         return {
             "total_requests": self.total_requests,
             "total_prompt_tokens": self.total_prompt_tokens,

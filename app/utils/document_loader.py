@@ -20,11 +20,8 @@ def load_documents(folder_path: str) -> list[Document]:
 
         content = file_path.read_text(encoding="utf-8").strip()
 
-
         document = Document(
-            doc_id=f"doc_{index}",
-            source=file_path.name,
-            content=content
+            doc_id=f"doc_{index}", source=file_path.name, content=content
         )
 
         documents.append(document)

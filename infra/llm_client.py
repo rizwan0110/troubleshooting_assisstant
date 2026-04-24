@@ -4,16 +4,14 @@ from app.core.config import settings
 from app.core.timeout import timeout_config
 from app.core.token_tracker import token_tracker
 
-#debug=settings.DEBUG
+# debug=settings.DEBUG
 
 
-client = Groq(
-        api_key=settings.GROQ_API_KEY,
-        timeout=timeout_config.read
-    )
+client = Groq(api_key=settings.GROQ_API_KEY, timeout=timeout_config.read)
+
 
 def generate_response(prompt: str, query: str = "") -> str:
-    
+
     chat_completion = client.chat.completions.create(
         messages=[
             {
@@ -21,9 +19,9 @@ def generate_response(prompt: str, query: str = "") -> str:
                 "content": prompt,
             }
         ],
-        model=settings.MODEL_NAME
+        model=settings.MODEL_NAME,
     )
-    
+
     # Track token usage
     if chat_completion.usage:
         token_tracker.track(
@@ -35,5 +33,3 @@ def generate_response(prompt: str, query: str = "") -> str:
         )
 
     return chat_completion.choices[0].message.content
-
-

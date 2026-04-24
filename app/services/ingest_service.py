@@ -4,7 +4,9 @@ from app.services.embedding_service import generate_embeddings
 from app.services.vector_store import VectorStore
 
 
-def ingest_documents(folder_path: str, vector_store: VectorStore, chunk_size: int = 500) -> dict:
+def ingest_documents(
+    folder_path: str, vector_store: VectorStore, chunk_size: int = 500
+) -> dict:
     """
     Load documents locally, split them into chunks, generate embeddings,
     create the FAISS index, and store the chunks.

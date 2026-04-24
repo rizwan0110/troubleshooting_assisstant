@@ -1,5 +1,5 @@
-
 import sys
+
 sys.path.append(".")
 
 from app.services.vector_store import VectorStore

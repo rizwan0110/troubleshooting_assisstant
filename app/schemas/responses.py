@@ -7,14 +7,14 @@ class IngestResponse(BaseModel):
     message: str
     word_count: int
     chunks_created: int
-    
+
+
 class QueryResponse(BaseModel):
-    message:str
-    
-    
+    message: str
+
+
 class ErrorResponse(BaseModel):
-    error:str
+    error: str
     details: Optional[str] = None
-    timestamp:datetime
-    request_id:int
-    
+    timestamp: datetime
+    request_id: int

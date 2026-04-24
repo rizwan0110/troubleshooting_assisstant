@@ -1,10 +1,9 @@
 from pydantic import BaseModel
 
+
 class IngestRequest(BaseModel):
-    text:str
-    
+    text: str
+
 
 class QueryRequest(BaseModel):
-    question:str
-    
-    
+    question: str
