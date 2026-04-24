@@ -18,9 +18,9 @@ from app.schemas.search import SearchRequest
 
 from app.services.vector_store import VectorStore
 from app.services.ingest_service import ingest_documents
-from app.services.embedding_service import generate_query_embedding
+#from app.services.embedding_service import generate_query_embedding
 
-from app.services.retrieval_service import retrieve_relevant_chunks
+#from app.services.retrieval_service import retrieve_relevant_chunks
 from app.services.generation_service import generate_answer
 from app.services.hybrid_retriever import HybridRetriever
 from app.utils.text_splitter import Chunk
