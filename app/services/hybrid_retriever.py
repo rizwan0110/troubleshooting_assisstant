@@ -3,7 +3,6 @@ from typing import List
 from rank_bm25 import BM25Okapi
 from app.services.vector_store import VectorStore
 from app.services.embedding_service import generate_query_embedding
-from app.utils.text_splitter import Chunk
 
 
 @dataclass

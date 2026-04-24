@@ -26,9 +26,6 @@ from app.services.hybrid_retriever import HybridRetriever
 from app.utils.text_splitter import Chunk
 
 from app.services.reranker import Reranker
-
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
 from app.core.rate_limiter import limiter
 
 setup_logging()

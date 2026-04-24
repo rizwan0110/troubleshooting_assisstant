@@ -2,7 +2,6 @@ from sentence_transformers import SentenceTransformer
 from app.utils.text_splitter import Chunk
 from typing import List
 from app.core.retry import retry_on_api_failure
-from app.core.timeout import timeout_config
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
