@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Optional
 
 
-
 class IngestResponse(BaseModel):
     message: str
     documents_loaded: int
@@ -11,6 +10,7 @@ class IngestResponse(BaseModel):
     embedding_dimension: int
     index_created: bool
     total_chunks_in_store: int
+
 
 class ErrorResponse(BaseModel):
     error: str

@@ -11,7 +11,6 @@ class Settings(BaseSettings):
     RERANKER_MODEL: str
     EMBEDDING_MODEL: str
 
-
     class Config:
         env_file = ".env"
 

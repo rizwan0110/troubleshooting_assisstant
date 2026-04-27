@@ -14,7 +14,12 @@ class ScoredChunk:
 
 
 class HybridRetriever:
-    def __init__(self, vector_store: VectorStore, alpha: float = 0.5, embedding_service: EmbeddingService = None):
+    def __init__(
+        self,
+        vector_store: VectorStore,
+        alpha: float = 0.5,
+        embedding_service: EmbeddingService = None,
+    ):
         self.vector_store = vector_store
         self.alpha = alpha
         self.bm25 = None

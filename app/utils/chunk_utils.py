@@ -5,6 +5,7 @@ Centralising RerankedChunk → Chunk conversion here ensures that
 prod (routes.py) and eval (eval_generation.py) always use identical
 logic — preventing silent eval/prod mismatches.
 """
+
 from typing import List
 from app.services.retrieval.reranker import RerankedChunk
 from app.utils.text_splitter import Chunk

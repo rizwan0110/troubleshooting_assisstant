@@ -57,7 +57,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Middleware 
+# Middleware
 app.add_middleware(RequestIDMiddleware)
 app.add_middleware(
     CORSMiddleware,
@@ -66,7 +66,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Exception handlers 
+
+# Exception handlers
 @app.exception_handler(ValidationException)
 async def validation_exception_handler(request: Request, exc: ValidationException):
     return JSONResponse(
@@ -96,6 +97,7 @@ async def generic_exception_handler(request: Request, exc: Exception):
             )
         ),
     )
+
 
 # Router
 app.include_router(router)
