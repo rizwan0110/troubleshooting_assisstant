@@ -1,8 +1,7 @@
 from dataclasses import dataclass
-from typing import List
 from rank_bm25 import BM25Okapi
-from app.services.vector_store import VectorStore
-from app.services.embedding_service import generate_query_embedding
+from infra.vector_store import VectorStore
+from app.services.ingestion.embedding_service import EmbeddingService
 
 
 @dataclass
@@ -15,10 +14,11 @@ class ScoredChunk:
 
 
 class HybridRetriever:
-    def __init__(self, vector_store: VectorStore, alpha: float = 0.5):
+    def __init__(self, vector_store: VectorStore, alpha: float = 0.5, embedding_service: EmbeddingService = None):
         self.vector_store = vector_store
         self.alpha = alpha
         self.bm25 = None
+        self.embedding_service = embedding_service or EmbeddingService()
 
     def build_bm25_index(self):
         tokenized_corpus = [
@@ -26,23 +26,25 @@ class HybridRetriever:
         ]
         self.bm25 = BM25Okapi(tokenized_corpus)
 
-    def _normalize_scores(self, scores: List[float]) -> List[float]:
+    def _normalize_scores(self, scores: list[float]) -> list[float]:
+        # Min-max normalise to [0, 1], higher is better.
         min_score = min(scores)
         max_score = max(scores)
         if max_score == min_score:
             return [0.0] * len(scores)
         return [(s - min_score) / (max_score - min_score) for s in scores]
 
-    def _normalize_distances(self, distances: List[float]) -> List[float]:
+    def _normalize_distances(self, distances: list[float]) -> list[float]:
+        # Convert distances to similarities — invert so lower distance = higher score.
         min_dist = min(distances)
         max_dist = max(distances)
         if max_dist == min_dist:
             return [1.0] * len(distances)
         return [1.0 - (d - min_dist) / (max_dist - min_dist) for d in distances]
 
-    def retrieve(self, query: str, top_k: int = 5) -> List[ScoredChunk]:
+    def retrieve(self, query: str, top_k: int = 5) -> list[ScoredChunk]:
         # Step 1: Dense retrieval
-        query_embedding = generate_query_embedding(query)
+        query_embedding = self.embedding_service.generate_query_embedding(query)
         dense_results = self.vector_store.search(query_embedding, top_k=top_k * 2)
 
         # Step 2: BM25 scoring
@@ -69,10 +71,8 @@ class HybridRetriever:
 
         for i, chunk in enumerate(all_chunks):
             if chunk.chunk_id in score_map:
-                # Chunk already from dense — just add sparse score
                 score_map[chunk.chunk_id]["sparse_score"] = normalized_bm25[i]
             elif normalized_bm25[i] > 0:
-                # Chunk only found by BM25 — no dense score
                 score_map[chunk.chunk_id] = {
                     "chunk": chunk,
                     "dense_score": 0.0,

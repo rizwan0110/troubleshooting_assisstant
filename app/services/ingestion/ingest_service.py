@@ -1,18 +1,16 @@
 from app.utils.document_loader import load_documents
 from app.utils.text_splitter import split_document_into_chunks
-from app.services.embedding_service import generate_embeddings
-from app.services.vector_store import VectorStore
+from app.services.ingestion.embedding_service import EmbeddingService
+from infra.vector_store import VectorStore
 
 
 def ingest_documents(
-    folder_path: str, vector_store: VectorStore, chunk_size: int = 500
+    folder_path: str,
+    vector_store: VectorStore,
+    chunk_size: int = 500,
+    embedding_service: EmbeddingService = None,
 ) -> dict:
-    """
-    Load documents locally, split them into chunks, generate embeddings,
-    create the FAISS index, and store the chunks.
-
-    Returns a summary dictionary.
-    """
+    embedding_service = embedding_service or EmbeddingService()
 
     documents = load_documents(folder_path)
 
@@ -28,7 +26,7 @@ def ingest_documents(
     if not all_chunks:
         raise ValueError("No chunks were created from the documents")
 
-    all_chunks = generate_embeddings(all_chunks)
+    all_chunks = embedding_service.generate_embeddings(all_chunks)
 
     if not all_chunks[0].embedding:
         raise ValueError("Embeddings were not generated correctly")

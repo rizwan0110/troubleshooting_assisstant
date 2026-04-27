@@ -1,5 +1,5 @@
 from sentence_transformers.cross_encoder import CrossEncoder
-from app.services.hybrid_retriever import ScoredChunk
+from app.services.retrieval.hybrid_retriever import ScoredChunk
 from typing import List
 from dataclasses import dataclass
 import logging

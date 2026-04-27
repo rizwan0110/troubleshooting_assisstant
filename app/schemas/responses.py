@@ -3,18 +3,17 @@ from datetime import datetime
 from typing import Optional
 
 
+
 class IngestResponse(BaseModel):
     message: str
-    word_count: int
+    documents_loaded: int
     chunks_created: int
-
-
-class QueryResponse(BaseModel):
-    message: str
-
+    embedding_dimension: int
+    index_created: bool
+    total_chunks_in_store: int
 
 class ErrorResponse(BaseModel):
     error: str
     details: Optional[str] = None
     timestamp: datetime
-    request_id: int
+    request_id: Optional[str] = None

@@ -1,9 +1,9 @@
 import json
 import logging
-from app.services.hybrid_retriever import HybridRetriever
-from app.services.reranker import Reranker
-from app.services.generation_service import generate_answer
-from app.utils.text_splitter import Chunk
+from app.services.retrieval.hybrid_retriever import HybridRetriever
+from app.services.retrieval.reranker import Reranker
+from app.services.generation.generation_service import generate_answer
+from app.utils.chunk_utils import reranked_to_chunks
 
 logger = logging.getLogger(__name__)
 
@@ -29,18 +29,8 @@ def evaluate_generation(
         # Step 2: Rerank
         reranked = reranker.rerank(query, candidates, top_k=5)
 
-        # Step 3: Build chunks for generation
-        chunks = []
-        for rc in reranked:
-            chunk = Chunk(
-                text=rc.text,
-                chunk_id=rc.metadata.get("chunk_id", ""),
-                doc_id=rc.metadata.get("doc_id", ""),
-                source=rc.metadata.get("source", ""),
-                section_title=rc.metadata.get("section_title", ""),
-                chunk_index=rc.metadata.get("chunk_index", 0),
-            )
-            chunks.append(chunk)
+        # Step 3: Build chunks for generation (shared with prod via chunk_utils)
+        chunks = reranked_to_chunks(reranked)
 
         # Step 4: Generate answer
         result = generate_answer(query, chunks)
@@ -52,7 +42,7 @@ def evaluate_generation(
         score = matches / len(expected) if expected else 0
         total_keyword_score += score
 
-        # Per-query log
+        # Log for each query 
         print(f"\nQuery: {query}")
         print(f"  Answer (first 200 chars): {answer[:200]}...")
         print(f"  Expected keywords: {expected}")

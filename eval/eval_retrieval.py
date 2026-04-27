@@ -1,12 +1,13 @@
 import json
 import logging
-from app.services.hybrid_retriever import HybridRetriever
-from app.services.reranker import Reranker
+from app.services.retrieval.hybrid_retriever import HybridRetriever
+from app.services.retrieval.reranker import Reranker
 
 logger = logging.getLogger(__name__)
 
 
 def chunk_is_relevant(chunk_text: str, keywords: list[str]) -> bool:
+    # A chunk counts as relevant if it matches at least half the expected keywords.
     text_lower = chunk_text.lower()
     matches = sum(1 for kw in keywords if kw.lower() in text_lower)
     return matches >= len(keywords) / 2

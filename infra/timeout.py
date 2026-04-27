@@ -1,4 +1,3 @@
-# Define timeout values for the project
 from dataclasses import dataclass
 
 

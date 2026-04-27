@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Optional
 from app.utils.document_loader import Document
 
 
@@ -11,17 +11,15 @@ class Chunk:
     section_title: str
     text: str
     chunk_index: int
-    embedding: Optional[List[float]] = None
+    embedding: Optional[list[float]] = None
 
 
 # Splits markdown by headings like #, ##, ###.
 def split_markdown_into_sections(text: str) -> list[dict]:
-
     sections = []
-
     lines = text.split("\n")
     current_section = "Introduction"
-    current_text = []
+    current_text = []  # always initialised before the loop
 
     for line in lines:
         if line.startswith("#"):
@@ -34,7 +32,6 @@ def split_markdown_into_sections(text: str) -> list[dict]:
                             "text": section_text,
                         }
                     )
-
             current_section = line.strip()
             current_text = []
         else:
@@ -61,11 +58,9 @@ def split_large_section(section_text: str, chunk_size: int = 500) -> list[str]:
         return [section_text]
 
     chunks = []
-
     for i in range(0, len(words), chunk_size):
         chunk_words = words[i: i + chunk_size]
-        chunk_text = " ".join(chunk_words)
-        chunks.append(chunk_text)
+        chunks.append(" ".join(chunk_words))
 
     return chunks
 
@@ -76,7 +71,6 @@ def split_document_into_chunks(
 ) -> list[Chunk]:
     chunks = []
     sections = split_markdown_into_sections(document.content)
-
     chunk_counter = 1
 
     for section in sections:

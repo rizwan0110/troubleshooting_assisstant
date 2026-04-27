@@ -31,7 +31,7 @@ class TokenTracker:
         model: str,
     ):
         usage = TokenUsage(
-            query=query[:100],
+            query=query[:100], # truncate to keep logs readable
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
             total_tokens=total_tokens,

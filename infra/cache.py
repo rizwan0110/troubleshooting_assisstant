@@ -9,7 +9,6 @@ query_cache = TTLCache(maxsize=100, ttl=3600)
 
 
 def get_cache_key(query: str) -> str:
-    """Create a consistent cache key from the query string."""
     normalized = query.strip().lower()
     return hashlib.md5(normalized.encode()).hexdigest()
 

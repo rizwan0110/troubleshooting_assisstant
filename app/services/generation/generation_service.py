@@ -1,7 +1,7 @@
 from typing import List
 from app.utils.text_splitter import Chunk
 from infra.llm_client import generate_response
-from app.core.retry import retry_on_api_failure
+from infra.retry import retry_on_api_failure
 
 
 @retry_on_api_failure(max_attempts=3, min_wait=1, max_wait=10)

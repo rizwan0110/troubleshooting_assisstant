@@ -2,10 +2,11 @@ import sys
 
 sys.path.append(".")
 
-from app.services.vector_store import VectorStore
-from app.services.ingest_service import ingest_documents
-from app.services.hybrid_retriever import HybridRetriever
-from app.services.reranker import Reranker
+from app.core.config import settings
+from infra.vector_store import VectorStore
+from app.services.ingestion.ingest_service import ingest_documents
+from app.services.retrieval.hybrid_retriever import HybridRetriever
+from app.services.retrieval.reranker import Reranker
 from eval.eval_retrieval import evaluate_retrieval
 from eval.eval_generation import evaluate_generation
 
@@ -14,7 +15,7 @@ vector_store = VectorStore()
 ingest_documents("data/docker_docs", vector_store)
 
 # Step 2: Initialize retriever and reranker
-hybrid_retriever = HybridRetriever(vector_store, alpha=0.5)
+hybrid_retriever = HybridRetriever(vector_store, alpha=settings.HYBRID_ALPHA)
 hybrid_retriever.build_bm25_index()
 reranker = Reranker()
 
@@ -25,14 +26,14 @@ results = evaluate_retrieval(hybrid_retriever, reranker, test_path="eval/test_qu
 evaluate_generation(hybrid_retriever, reranker, test_path="eval/test_questions.json")
 
 # Step 5: CI gate
+# Fail the process (exit 1) if any metric drops below its minimum — used as a CI gate.
 MIN_PRECISION = 0.40    # current: 0.48
 MIN_MRR = 0.65          # current: 0.75
 MIN_RECALL = 0.50       # current: 0.60
-
 failed = False
 
-if results["recall"] < MIN_RECALL:
-    print(f"FAIL: Recall {results['recall']:.2%} is below minimum {MIN_RECALL:.2%}")
+if results["recall_at_5"] < MIN_RECALL:
+    print(f"FAIL: Recall {results['recall_at_5']:.2%} is below minimum {MIN_RECALL:.2%}")
     failed = True
 
 if results["mrr"] < MIN_MRR:

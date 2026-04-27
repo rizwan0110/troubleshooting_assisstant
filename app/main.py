@@ -1,45 +1,64 @@
 import logging
-from datetime import datetime
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
+from datetime import datetime
 
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.core.middleware import RequestIDMiddleware
 from app.core.exceptions import ValidationException
-from app.core.timeout import timeout_config
-from app.core.cache import save_to_cache, get_from_cache, query_cache
-from app.core.token_tracker import token_tracker
-from fastapi.middleware.cors import CORSMiddleware
-
-
 from app.schemas.responses import ErrorResponse
-from app.schemas.search import SearchRequest
 
-from app.services.vector_store import VectorStore
-from app.services.ingest_service import ingest_documents
+from infra.vector_store import VectorStore
+from infra.rate_limiter import limiter
+from infra.timeout import timeout_config
+from infra.cache import query_cache
 
-from app.services.generation_service import generate_answer
-from app.services.hybrid_retriever import HybridRetriever
-from app.utils.text_splitter import Chunk
+from app.services.retrieval.hybrid_retriever import HybridRetriever
+from app.services.retrieval.reranker import Reranker
 
-from app.services.reranker import Reranker
-from app.core.rate_limiter import limiter
+from app.api.routes import router
 
 setup_logging()
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG)
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # ── Startup ──────────────────────────────────────────
+    logger.info(
+        "Timeout config: connect=%ss, read=%ss",
+        timeout_config.connect,
+        timeout_config.read,
+    )
+    logger.info(
+        "Cache config: maxsize=%s, ttl=%.0fs",
+        query_cache.maxsize,
+        query_cache.timer(),
+    )
+
+    app.state.limiter = limiter
+    app.state.vector_store = VectorStore()
+    app.state.reranker = Reranker()
+    app.state.hybrid_retriever = None
+
+    yield
+    # ── Shutdown (add cleanup here if needed) ────────────
+
+
+app = FastAPI(
+    title=settings.APP_NAME,
+    version=settings.VERSION,
+    debug=settings.DEBUG,
+    lifespan=lifespan,
+)
+
+# Middleware 
 app.add_middleware(RequestIDMiddleware)
-
-app.state.limiter = limiter
-app.state.vector_store = VectorStore()
-app.state.reranker = Reranker()
-
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -47,118 +66,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-logger.info(
-    f"Timeout config: connect={timeout_config.connect}s, read={timeout_config.read}s"
-)
-
-logger.info(
-    f"Cache config: maxsize={query_cache.maxsize}, ttl={query_cache.timer():.0f}s"
-)
-
-
+# Exception handlers 
 @app.exception_handler(ValidationException)
 async def validation_exception_handler(request: Request, exc: ValidationException):
-    error_response = ErrorResponse(
-        error=exc.message, details=exc.details, timestamp=datetime.now()
+    return JSONResponse(
+        status_code=400,
+        content=jsonable_encoder(
+            ErrorResponse(
+                error=exc.message,
+                details=exc.details,
+                timestamp=datetime.now(),
+                request_id=getattr(request.state, "request_id", None),
+            )
+        ),
     )
-
-    return JSONResponse(status_code=400, content=jsonable_encoder(error_response))
 
 
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
     logger.exception("Unhandled exception occurred")
-
-    error_response = ErrorResponse(
-        error="Internal server error", details=None, timestamp=datetime.now()
+    return JSONResponse(
+        status_code=500,
+        content=jsonable_encoder(
+            ErrorResponse(
+                error="Internal server error",
+                details=None,
+                timestamp=datetime.now(),
+                request_id=getattr(request.state, "request_id", None),
+            )
+        ),
     )
 
-    return JSONResponse(status_code=500, content=jsonable_encoder(error_response))
-
-
-@app.get("/")
-def home():
-    return {"version": settings.VERSION}
-
-
-@app.get("/health")
-def health_check():
-    logger.info("Health check called")
-    return {"status": "OK"}
-
-
-@app.post("/ingest")
-def ingest():
-    logger.info("Starting ingestion from local documents")
-
-    app.state.vector_store = VectorStore()
-
-    try:
-        result = ingest_documents(
-            folder_path="data/docker_docs",
-            vector_store=app.state.vector_store,
-            chunk_size=500,
-        )
-
-        # Build BM25 AFTER chunks exist
-        app.state.hybrid_retriever = HybridRetriever(app.state.vector_store, alpha=0.5)
-        app.state.hybrid_retriever.build_bm25_index()
-
-        logger.info(
-            "Ingestion completed successfully | documents=%s chunks=%s dimension=%s",
-            result["documents_loaded"],
-            result["chunks_created"],
-            result["embedding_dimension"],
-        )
-
-        return result
-
-    except ValueError as exc:
-        logger.warning("Ingestion failed: %s", str(exc))
-        return JSONResponse(status_code=400, content={"message": str(exc)})
-
-
-@app.post("/ask")
-@limiter.limit("10/minute")
-def ask_question(request: Request, search_request: SearchRequest):
-    logger.info("Received query request | query=%s", search_request.query)
-
-    # Step 0: Check cache
-    cached = get_from_cache(search_request.query)
-    if cached:
-        return cached
-
-    # Step 1: Hybrid retrieval
-    scored_chunks = app.state.hybrid_retriever.retrieve(
-        query=search_request.query, top_k=15
-    )
-
-    # Step 2: Rerank
-    reranked = app.state.reranker.rerank(
-        query=search_request.query, chunks=scored_chunks, top_k=search_request.top_k
-    )
-
-    # Step 3: Build chunks + generate
-    chunks = []
-    for rc in reranked:
-        chunk = Chunk(
-            text=rc.text,
-            chunk_id=rc.metadata["chunk_id"],
-            doc_id=rc.metadata["doc_id"],
-            source=rc.metadata["source"],
-            section_title=rc.metadata["section_title"],
-            chunk_index=rc.metadata["chunk_index"],
-        )
-        chunks.append(chunk)
-
-    result = generate_answer(search_request.query, chunks)
-
-    # Step 4: Save to cache
-    save_to_cache(search_request.query, result)
-
-    return result
-
-
-@app.get("/token-usage")
-def get_token_usage():
-    return token_tracker.get_summary()
+# Router
+app.include_router(router)

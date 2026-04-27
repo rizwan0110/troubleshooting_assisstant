@@ -34,6 +34,6 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
             f"request_id={request_id} | Request finished {method} {path} "
             f"status_code={response.status_code} duration={duration:.4f}s"
         )
-
+        # Expose the request ID so that it can be referenced when reporting errors.
         response.headers["X-Request-ID"] = request_id
         return response

@@ -1,10 +1,7 @@
-import os
 from groq import Groq
 from app.core.config import settings
-from app.core.timeout import timeout_config
-from app.core.token_tracker import token_tracker
-
-# debug=settings.DEBUG
+from infra.timeout import timeout_config
+from app.services.monitoring.token_tracker import token_tracker
 
 
 client = Groq(api_key=settings.GROQ_API_KEY, timeout=timeout_config.read)
@@ -22,8 +19,8 @@ def generate_response(prompt: str, query: str = "") -> str:
         model=settings.MODEL_NAME,
     )
 
-    # Track token usage
     if chat_completion.usage:
+        # Fall back to prompt prefix if no query string was passed (e.g. called directly in tests).
         token_tracker.track(
             query=query or prompt[:100],
             prompt_tokens=chat_completion.usage.prompt_tokens,
