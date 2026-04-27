@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Troubleshooting Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface-hover: #22252f;
+            --border: #2a2d3a;
+            --text: #e4e4e7;
+            --text-muted: #8b8d98;
+            --accent: #6c9cfc;
+            --accent-dim: rgba(108, 156, 252, 0.1);
+            --source-bg: #1e2230;
+            --success: #4ade80;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 760px;
+            padding: 0 24px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            width: 100%;
+            padding: 48px 0 32px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* Search area */
+        .search-area {
+            width: 100%;
+            margin-bottom: 32px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 6px 6px 6px 18px;
+            transition: border-color 0.2s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--accent);
+        }
+
+        .input-wrapper input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            padding: 10px 0;
+        }
+
+        .input-wrapper input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .input-wrapper button {
+            background: var(--accent);
+            color: #0f1117;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+
+        .input-wrapper button:hover {
+            opacity: 0.85;
+        }
+
+        .input-wrapper button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Sample questions */
+        .samples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .samples button {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.78rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .samples button:hover {
+            border-color: var(--accent);
+            color: var(--text);
+            background: var(--accent-dim);
+        }
+
+        /* Response area */
+        .response-area {
+            width: 100%;
+            margin-bottom: 48px;
+        }
+
+        .response-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            display: none;
+        }
+
+        .response-card.visible {
+            display: block;
+        }
+
+        .response-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 12px;
+        }
+
+        .response-answer {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--text);
+            white-space: pre-wrap;
+        }
+
+        /* Sources */
+        .sources-section {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sources-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 10px;
+        }
+
+        .source-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: var(--source-bg);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 6px;
+            font-size: 0.82rem;
+        }
+
+        .source-icon {
+            color: var(--accent);
+            font-family: 'DM Mono', monospace;
+            font-size: 0.72rem;
+            padding: 2px 6px;
+            background: var(--accent-dim);
+            border-radius: 4px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .source-detail {
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .source-detail strong {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 40px 0;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .loading.visible {
+            display: flex;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error */
+        .error-msg {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #fca5a5;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .error-msg.visible {
+            display: block;
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .stat {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'DM Mono', monospace;
+        }
+
+        .stat span {
+            color: var(--text);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            padding: 24px 0;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>RAG Troubleshooting Assistant</h1>
+            <p>Ask questions about your technical documentation</p>
+        </header>
+
+        <div class="search-area">
+            <div class="input-wrapper">
+                <input
+                    type="text"
+                    id="queryInput"
+                    placeholder="Ask a question..."
+                    autocomplete="off"
+                />
+                <button id="askBtn" onclick="askQuestion()">Ask</button>
+            </div>
+            <div class="samples">
+                <button onclick="fillQuery('What is a Docker container?')">What is a Docker container?</button>
+                <button onclick="fillQuery('How do I publish a port?')">How do I publish a port?</button>
+                <button onclick="fillQuery('What is Docker Compose?')">What is Docker Compose?</button>
+                <button onclick="fillQuery('How does the build cache work?')">How does the build cache work?</button>
+            </div>
+        </div>
+
+        <div class="response-area">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                Searching documentation...
+            </div>
+
+            <div class="error-msg" id="error"></div>
+
+            <div class="response-card" id="responseCard">
+                <div class="response-label">Answer</div>
+                <div class="response-answer" id="answerText"></div>
+
+                <div class="sources-section" id="sourcesSection">
+                    <div class="sources-label">Sources</div>
+                    <div id="sourcesList"></div>
+                </div>
+
+                <div class="stats-bar" id="statsBar">
+                    <div class="stat">Sources: <span id="statSources">0</span></div>
+                    <div class="stat">Time: <span id="statTime">0ms</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        RAG Troubleshooting Assistant — Hybrid Retrieval + Cross-Encoder Reranking
+    </footer>
+
+    <script>
+        const API_URL = "http://localhost:8001";
+        const queryInput = document.getElementById("queryInput");
+
+        queryInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") askQuestion();
+        });
+
+        function fillQuery(text) {
+            queryInput.value = text;
+            queryInput.focus();
+        }
+
+        async function askQuestion() {
+            const query = queryInput.value.trim();
+            if (!query) return;
+
+            const askBtn = document.getElementById("askBtn");
+            const loading = document.getElementById("loading");
+            const responseCard = document.getElementById("responseCard");
+            const error = document.getElementById("error");
+
+            // Reset
+            askBtn.disabled = true;
+            loading.classList.add("visible");
+            responseCard.classList.remove("visible");
+            error.classList.remove("visible");
+
+            const startTime = performance.now();
+
+            try {
+                const res = await fetch(`${API_URL}/ask`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query: query, top_k: 5 }),
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => null);
+                    throw new Error(errData?.detail || errData?.error || `Server returned ${res.status}`);
+                }
+
+                const data = await res.json();
+                const elapsed = Math.round(performance.now() - startTime);
+
+                // Display answer
+                document.getElementById("answerText").textContent = data.answer || "No answer returned.";
+
+                // Display sources
+                const sourcesList = document.getElementById("sourcesList");
+                sourcesList.innerHTML = "";
+
+                if (data.sources && data.sources.length > 0) {
+                    data.sources.forEach((src, i) => {
+                        const item = document.createElement("div");
+                        item.className = "source-item";
+                        item.innerHTML = `
+                            <span class="source-icon">${i + 1}</span>
+                            <div class="source-detail">
+                                <strong>${src.source || "Unknown"}</strong> — ${src.section_title || ""}
+                            </div>
+                        `;
+                        sourcesList.appendChild(item);
+                    });
+                    document.getElementById("sourcesSection").style.display = "block";
+                } else {
+                    document.getElementById("sourcesSection").style.display = "none";
+                }
+
+                // Stats
+                document.getElementById("statSources").textContent = data.sources ? data.sources.length : 0;
+                document.getElementById("statTime").textContent = `${elapsed}ms`;
+
+                responseCard.classList.add("visible");
+
+            } catch (err) {
+                error.textContent = err.message || "Something went wrong. Is the server running?";
+                error.classList.add("visible");
+            } finally {
+                askBtn.disabled = false;
+                loading.classList.remove("visible");
+            }
+        }
+    </script>
+</body>
+</html>

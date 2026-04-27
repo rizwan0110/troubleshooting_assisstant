@@ -12,6 +12,8 @@ from app.core.exceptions import ValidationException
 from app.core.timeout import timeout_config
 from app.core.cache import save_to_cache, get_from_cache, query_cache
 from app.core.token_tracker import token_tracker
+from fastapi.middleware.cors import CORSMiddleware
+
 
 from app.schemas.responses import ErrorResponse
 from app.schemas.search import SearchRequest
@@ -36,6 +38,14 @@ app.add_middleware(RequestIDMiddleware)
 app.state.limiter = limiter
 app.state.vector_store = VectorStore()
 app.state.reranker = Reranker()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 logger.info(
     f"Timeout config: connect={timeout_config.connect}s, read={timeout_config.read}s"
