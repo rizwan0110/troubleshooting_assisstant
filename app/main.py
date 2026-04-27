@@ -18,7 +18,6 @@ from infra.rate_limiter import limiter
 from infra.timeout import timeout_config
 from infra.cache import query_cache
 
-from app.services.retrieval.hybrid_retriever import HybridRetriever
 from app.services.retrieval.reranker import Reranker
 
 from app.api.routes import router
