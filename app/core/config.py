@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     HYBRID_ALPHA: float  # weight between dense and sparse retrieval (0=BM25, 1=dense)
     RERANKER_MODEL: str
     EMBEDDING_MODEL: str
+    DOCS_FOLDER: str
+
 
     class Config:
         env_file = ".env"
