@@ -39,6 +39,7 @@ jobs:
           HYBRID_ALPHA: 0.5
           RERANKER_MODEL: cross-encoder/ms-marco-MiniLM-L-6-v2
           EMBEDDING_MODEL: all-MiniLM-L6-v2
+          DOCS_FOLDER: data/docker_docs
 
         run: |
           python eval/run_eval.py
