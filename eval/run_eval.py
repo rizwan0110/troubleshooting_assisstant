@@ -16,6 +16,7 @@ ingest_documents("data/docker_docs", vector_store)
 
 # Step 2: Initialize retriever and reranker
 hybrid_retriever = HybridRetriever(vector_store, alpha=settings.HYBRID_ALPHA)
+# run eval, print results
 hybrid_retriever.build_bm25_index()
 reranker = Reranker()
 

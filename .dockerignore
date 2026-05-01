@@ -1,9 +1,0 @@
-myenv/
-__pycache__/
-*.pyc
-.git/
-.env
-eval/
-data/
-*.md
-.gitignore
