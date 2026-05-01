@@ -81,9 +81,11 @@ from fastapi.responses import FileResponse
 
 app.mount("/ui", StaticFiles(directory="ui"), name="ui")
 
+
 @app.get("/app")
 def serve_ui():
     return FileResponse("ui/index.html")
+
 
 # Middleware
 app.add_middleware(RequestIDMiddleware)

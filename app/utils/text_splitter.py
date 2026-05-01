@@ -71,7 +71,7 @@ def split_large_section(
     step = chunk_size - overlap  # FIX 1: slide by (chunk_size - overlap)
 
     for i in range(0, len(words), step):
-        chunk_words = words[i: i + chunk_size]
+        chunk_words = words[i : i + chunk_size]
         if chunk_words:
             # FIX 2: prepend section title into every chunk's text
             chunks.append(title_prefix + " ".join(chunk_words))
