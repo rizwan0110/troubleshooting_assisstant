@@ -12,7 +12,6 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str
     DOCS_FOLDER: str
 
-
     class Config:
         env_file = ".env"
 
