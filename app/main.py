@@ -22,6 +22,9 @@ from app.services.ingestion.ingest_service import ingest_documents
 from app.services.retrieval.hybrid_retriever import HybridRetriever
 from app.services.retrieval.reranker import Reranker
 
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
 from app.api.routes import router
 
 setup_logging()
@@ -76,8 +79,7 @@ app = FastAPI(
     debug=settings.DEBUG,
     lifespan=lifespan,
 )
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+
 
 app.mount("/ui", StaticFiles(directory="ui"), name="ui")
 
