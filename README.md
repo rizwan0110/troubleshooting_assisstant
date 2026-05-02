@@ -10,7 +10,7 @@ In this implementation, Docker's official documentation is used as the sample da
 
 ## Live Demo
 
-Try the live application here: [RAG Troubleshooting Assistant on Hugging Face Spaces](https://rizwan99-troubleshooting-assisstance.hf.space/app)
+Try the live application here: [Troubleshooting Assistant on Hugging Face Spaces](https://rizwan99-troubleshooting-assisstance.hf.space/app)
 
 ## Motivation
 
