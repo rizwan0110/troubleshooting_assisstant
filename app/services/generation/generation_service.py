@@ -2,6 +2,7 @@ from typing import List
 from app.utils.text_splitter import Chunk
 from infra.llm_client import generate_response
 from infra.retry import retry_on_api_failure
+from app.prompt.prompt_loader import get_prompt
 
 
 @retry_on_api_failure(max_attempts=3, min_wait=1, max_wait=10)
@@ -13,21 +14,7 @@ def generate_answer(query: str, chunks: List[Chunk]) -> dict:
         ]
     )
 
-    prompt = f"""
-You are an AI troubleshooting assistant for support engineers and developer.
-
-Use ONLY the provided context to answer the question.
-
-If the answer is not found in the context, say:
-"I could not find enough information in the documentation."
-
-
-Context:
-{context_text}
-
-Question:
-{query}
-"""
+    prompt = get_prompt("system_prompt").format(context=context_text, question=query)
 
     answer = generate_response(prompt, query=query)
     sources = [
