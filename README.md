@@ -1,3 +1,14 @@
+---
+title: Production RAG
+emoji: 🔍
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
+
 # RAG Troubleshooting Assistant
 
 ## Overview
@@ -149,3 +160,17 @@ python eval/run_eval.py
 - Persistent token usage tracking with database storage
 - Cloud deployment (AWS/GCP)
 - Support for additional document formats (PDF, HTML)
+=======
+---
+title: Troubleshooting Assisstance
+emoji: 😻
+colorFrom: indigo
+colorTo: red
+sdk: docker
+pinned: false
+license: mit
+short_description: A RAG app for troubleshooting docker
+---
+
+Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+>>>>>>> c7392a031c3ef2dadb5e04922d93da3a8862f264
