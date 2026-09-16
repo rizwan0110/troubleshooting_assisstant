@@ -35,6 +35,7 @@ The system is built to work with any technical documentation in markdown format.
 - **CI:** GitHub Actions
 - **Deployment:** Hugging Face Spaces
 
+
 ## Architecture
 
 The system follows a three-stage pipeline:
