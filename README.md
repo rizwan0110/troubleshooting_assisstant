@@ -29,7 +29,7 @@ The system is built to work with any technical documentation in markdown format.
 - **Vector Store:** FAISS
 - **Sparse Retrieval:** BM25 (rank-bm25)
 - **Reranking:** Cross-encoder (ms-marco-MiniLM-L-6-v2)
-- **LLM:** Groq (GPT)
+- **LLM:** Groq (GPT oss)
 - **Frontend:** HTML/CSS/JS (served by FastAPI)
 - **Containerization:** Docker
 - **CI:** GitHub Actions
